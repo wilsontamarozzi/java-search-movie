@@ -1,0 +1,77 @@
+************************************************
+*** LOOP PARA GERAR ICONE DO TIPO DE ARQUIVO ***
+************************************************
+
+for(Video v : videos) {
+	File arquivo = new File(v.getPath());
+			
+	Icon ico = FileSystemView.getFileSystemView().getSystemIcon(arquivo);
+	
+	v.setThumbnail((ImageIcon) ico);
+}
+
+
+***************************************************
+*** ABRIR COM UM REPRODUTOR DE VIDEO ESPECIFICO ***
+***************************************************
+ProcessBuilder pb = new ProcessBuilder("C:/Arquivos de programas/VideoLAN/VLC/vlc.exe", videoPath);
+pb.start();
+
+
+*********************************************
+*** ANTIGA FUNÇÃO PARA LISTAR OS ARQUIVOS ***
+*********************************************
+private List<Video> listaDadosDiretorio(String diretorioRootPath, List<String> extensoesAceitas) {
+		
+		List<Video> videos = new ArrayList<Video>(0);
+		
+		try {
+			File diretorio = new File(diretorioRootPath);
+			
+			if(diretorio.isDirectory()) {
+				File arquivos[] = diretorio.listFiles();
+				
+				if(arquivos != null) {					
+					for(File arquivo : arquivos) {
+						if(arquivo.isFile()) {
+							if(extensoesAceitas.contains(this.getFileExtension(arquivo))) {
+								Video video = new Video();
+								
+								video.setNome(arquivo.getName());
+								video.setPath(arquivo.getAbsolutePath());
+								video.setTamanho(arquivo.length());
+								video.setDataUltimaModificacao(arquivo.lastModified());
+								
+								videos.add(video);			
+							}							
+						} else if(arquivo.isDirectory()) {
+							videos.addAll(this.listaDadosDiretorio(arquivo.getAbsolutePath(), extensoesAceitas));
+						}			
+					}
+				}
+			}
+		} catch( Exception e ) {
+			e.printStackTrace();
+		}
+		
+		return videos;
+	}
+	
+*********************************************
+*** ANTIGA FUNÇÃO PARA GERAR AS THUMBNAIL ***
+*********************************************
+	
+	for(Video v : videos) {
+try {
+	String oldPath = v.getPath();
+	String thumbnailPath = Configuracao.getThumbnailFolderPath() + System.nanoTime() + ".jpg";
+	
+	v.setThumbnailPath(thumbnailPath);
+	
+	new DecodeAndCaptureFramesUtil(oldPath, thumbnailPath);
+} catch (Exception e) {
+	System.out.println("Houve um erro ao gerar a thumbnail\n" + e);
+}
+
+i++;
+frame.getProgressBar().setValue(i);
